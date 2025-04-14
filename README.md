@@ -1,1 +1,1 @@
-Safe_Campus
+SAFE CAMPUS
