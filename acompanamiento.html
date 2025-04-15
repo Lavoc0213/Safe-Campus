@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acompañamiento - SafeCampus</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <style>
+    body {
+      background: #f4f6f8;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .top-bar {
+      background-color: #0d6efd;
+      color: white;
+      padding: 0.7rem;
+      text-align: center;
+    }
+    .container-main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+    }
+    .content-box {
+      background: white;
+      border-radius: 10px;
+      padding: 2rem;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      margin-top: 2rem;
+    }
+    .bottom-bar {
+      background-color: #0d6efd;
+      color: white;
+      padding: 0.7rem;
+      text-align: center;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+    }
+    #map {
+      height: 400px;
+      width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body class="p-3">
+
+
+  
+  <div class="top-bar">
+    <div class="top-bar d-flex justify-content-between align-items-center px-3">
+      <div>
+        <a href="mapa.html" class="btn btn-sm btn-light me-2"><i class="fas fa-map"></i> Mapa</a>
+        <a href="index.html" class="btn btn-sm btn-danger"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+      </div>
+    </div>
+    <h5><i class="fas fa-hands-helping"></i> Acompañamiento Seguro</h5>
+  </div>
+
+  <div class="container container-main">
+    <div class="content-box text-center">
+      <div id="map"></div>
+      <div class="btn-group d-flex justify-content-around mb-3 w-100">
+        <button class="btn btn-success"><i class="fas fa-play"></i> Iniciar</button>
+        <button class="btn btn-info"><i class="fas fa-address-book"></i> Contactos</button>
+        <button class="btn btn-warning"><i class="fas fa-clock"></i> Tiempo</button>
+        <button class="btn btn-danger"><i class="fas fa-stop"></i> Detener</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <a href="perfil.html" class="text-white"><i class="fas fa-user fa-lg"></i> Perfil</a>
+    <a href="configuracion.html" class="text-white"><i class="fas fa-cog fa-lg"></i> Configuración</a>
+  </div>
+
+  <!-- Script para cargar Google Maps -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=TU_CLAVE_API&callback=initMap" async defer></script>
+
+  <div id="map" style="height: 500px;"></div>
+  <h2>Tu ubicación en tiempo real</h2>
+  <div id="map" style="height: 500px;"></div>
+
+  <script>
+      // Verifica si la geolocalización es soportada
+      if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+              var lat = position.coords.latitude;
+              var lon = position.coords.longitude;
+
+              // Muestra el mapa centrado en la ubicación del usuario
+              var map = L.map('map').setView([lat, lon], 13); // Coordenadas obtenidas
+
+              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              }).addTo(map);
+
+              // Añade un marcador en la ubicación del usuario
+              var marker = L.marker([lat, lon]).addTo(map);
+              marker.bindPopup("<b>Tu ubicación</b>").openPopup();
+          }, function(error) {
+              alert("Error al obtener la ubicación: " + error.message);
+          });
+      } else {
+          alert("La geolocalización no es soportada por este navegador.");
+      }
+  </script>
+ <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  
+ <script>
+   // Inicializar el mapa
+   let map;
+
+   function initMap() {
+     if (navigator.geolocation) {
+       navigator.geolocation.getCurrentPosition(function(position) {
+         const userLocation = {
+           lat: position.coords.latitude,
+           lng: position.coords.longitude
+         };
+
+         // Crear el mapa centrado en la ubicación del usuario
+         map = L.map('map').setView([userLocation.lat, userLocation.lng], 13);
+
+         // Agregar la capa de OpenStreetMap al mapa
+         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+         }).addTo(map);
+
+         // Colocar un marcador en la ubicación del usuario
+         L.marker([userLocation.lat, userLocation.lng]).addTo(map)
+           .bindPopup('Tu ubicación')
+           .openPopup();
+
+       }, function() {
+         alert("No se pudo obtener la ubicación.");
+       });
+     } else {
+       alert("Geolocalización no soportada en este navegador.");
+     }
+   }
+
+   // Ejecutar la función cuando la página esté lista
+   window.onload = initMap;
+ </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

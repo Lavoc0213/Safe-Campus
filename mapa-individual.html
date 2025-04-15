@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mapa Interactivo</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body {
+      background: #f4f6f8;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .top-bar {
+      background-color: #0d6efd;
+      color: white;
+      padding: 0.7rem;
+      text-align: center;
+    }
+
+    .bottom-bar {
+      background-color: #0d6efd;
+      color: white;
+      padding: 0.7rem;
+      text-align: center;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+
+    .container-main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+    }
+
+    .content-box {
+      background: white;
+      border-radius: 10px;
+      padding: 2rem;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+    #map {
+      height: 400px;
+      width: 100%;
+      border-radius: 10px;
+      margin-top: 1rem;
+    }
+
+    .btn-group {
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .btn-group .btn {
+      width: 23%;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="top-bar d-flex justify-content-between align-items-center px-3">
+        <div>
+          <a href="mapa.html" class="btn btn-sm btn-light me-2"><i class="fas fa-map"></i> Mapa</a>
+          <a href="index.html" class="btn btn-sm btn-danger"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+        </div>
+      </div>
+    <h5><i class="fas fa-map-marker-alt"></i> Mapa Interactivo</h5>
+  </div>
+<!-- Modal Reportar Zona -->
+<div class="modal fade" id="modalReportar" tabindex="-1" aria-labelledby="modalReportarLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title" id="modalReportarLabel">📶 Reportar zona</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          Puedes reportar una zona con problemas, como calles sin iluminación, sitios sospechosos o áreas que consideres de riesgo. Esta información ayudará a otros usuarios a estar alertas.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Entendido</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Zonas Peligrosas -->
+  <div class="modal fade" id="modalZonas" tabindex="-1" aria-labelledby="modalZonasLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-warning">
+          <h5 class="modal-title" id="modalZonasLabel">⚠️ Zonas peligrosas</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          Aquí verás una lista o mapa con zonas reportadas frecuentemente como peligrosas. Te recomendamos evitar esas áreas o estar muy alerta si debes pasar por allí.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Entendido</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Incidentes Recientes -->
+  <div class="modal fade" id="modalIncidentes" tabindex="-1" aria-labelledby="modalIncidentesLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-info text-white">
+          <h5 class="modal-title" id="modalIncidentesLabel">🔄 Incidentes recientes</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          Consulta los incidentes de seguridad reportados recientemente por otros usuarios, como robos, accidentes o situaciones sospechosas.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-info" data-bs-dismiss="modal">Entendido</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="container container-main">
+    <div class="content-box">
+      <div id="map"></div>
+      <div class="btn-group d-flex justify-content-between">
+        <button class="btn btn-outline-danger" onclick="abrirFormulario()">📶 Reportar zona</button>
+        <button class="btn btn-outline-warning">⚠️ Zonas peligrosas</button>
+        <button class="btn btn-outline-info">🔄 Incidentes recientes</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-bar d-flex justify-content-around">
+    <a href="perfil.html" class="text-white"><i class="fas fa-user fa-lg"></i> Perfil</a>
+    <a href="configuracion.html" class="text-white"><i class="fas fa-cog fa-lg"></i> Configuración</a>
+  </div>
+
+  <!-- Incluir Leaflet -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  
+  <script>
+    // Inicializar el mapa
+    let map;
+
+    function initMap() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          const userLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+
+          // Crear el mapa centrado en la ubicación del usuario
+          map = L.map('map').setView([userLocation.lat, userLocation.lng], 13);
+
+          // Agregar la capa de OpenStreetMap al mapa
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          }).addTo(map);
+
+          // Colocar un marcador en la ubicación del usuario
+          L.marker([userLocation.lat, userLocation.lng]).addTo(map)
+            .bindPopup('Tu ubicación')
+            .openPopup();
+
+        }, function() {
+          alert("No se pudo obtener la ubicación.");
+        });
+      } else {
+        alert("Geolocalización no soportada en este navegador.");
+      }
+    }
+
+    // Ejecutar la función cuando la página esté lista
+    window.onload = initMap;
+  </script>
+
+  <script src="libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="js/scripts.js"></script>
+</body>
+</html>
