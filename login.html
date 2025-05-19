@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SafeCampus - Registrarse</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #f4f6f8;
+            font-family: 'Inter', sans-serif;
+        }
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .card {
+            width: 100%;
+            max-width: 420px;
+            padding: 2.5rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            border: none;
+            border-radius: 1rem;
+        }
+        .card-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #0d6efd;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .form-label {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #343a40;
+            margin-bottom: 0.5rem;
+        }
+        .form-control {
+            padding: 0.8rem;
+            font-size: 1.1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #ced4da;
+        }
+        .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(0, 108, 255, 0.25);
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1.2rem;
+            font-weight: 500;
+            border-radius: 0.75rem;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        .text-muted {
+            font-size: 1rem;
+            color: #6c757d;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .mt-4{
+            margin-top: 2.5rem;
+        }
+        .mb-4{
+            margin-bottom: 2.5rem;
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <div class="card">
+        <h2 class="card-title"><i class="fas fa-user-plus"></i> Registrarse</h2>
+        <p class="text-muted">Crea una nueva cuenta</p>
+
+        <form id="form-registro">
+            <div class="mb-4">
+                <label for="registro-email" class="form-label">Correo electrónico</label>
+                <input type="email" class="form-control" id="registro-email" placeholder="usuario@correo.com" required>
+            </div>
+
+            <div class="mb-4">
+                <label for="registro-password" class="form-label">Contraseña</label>
+                <input type="password" class="form-control" id="registro-password" placeholder="********" required>
+            </div>
+
+            <div class="mb-4">
+                <label for="confirm-password" class="form-label">Confirmar Contraseña</label>
+                <input type="password" class="form-control" id="confirm-password" placeholder="********" required>
+            </div>
+
+            <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-user-check"></i> Registrar Cuenta
+                </button>
+            </div>
+
+            <div class="text-center mt-4">
+                ¿Ya tienes una cuenta? <a href="index.html" style="font-size: 1rem; color: #0d6efd;">Iniciar Sesión</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+
+    // Tu configuración de Firebase (asegúrate de que sea la misma que en tu página de inicio de sesión)
+    const firebaseConfig = {
+        apiKey: "AIzaSyBn4RQ511FLSSPbadyC4Z9WR_LE91hy7qM",
+        authDomain: "safecamp-1eaa6.firebaseapp.com",
+        projectId: "safecamp-1eaa6",
+        storageBucket: "safecamp-1eaa6.firebasestorage.app",
+        messagingSenderId: "199048059756",
+        appId: "1:199048059756:web:4ed0a257f6807a71307149"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    document.getElementById('form-registro').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('registro-email').value;
+        const password = document.getElementById('registro-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+
+        if (password !== confirmPassword) {
+            alert("Las contraseñas no coinciden.");
+            return;
+        }
+
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // Guardar información adicional del usuario en Firestore
+            await setDoc(doc(db, 'usuarios', user.uid), {
+                email: email,
+                // Puedes agregar más información aquí si lo deseas
+            });
+
+            alert("Registro exitoso. Serás redirigido al mapa.");
+            window.location.href = "mapa.html"; // Redirigir al mapa después del registro
+        } catch (error) {
+            alert("Error al registrar usuario: " + error.message);
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
