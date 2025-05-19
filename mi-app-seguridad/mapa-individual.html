@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mapa Interactivo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #f4f6f8;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .top-bar {
+            background-color: #0d6efd;
+            color: white;
+            padding: 0.8rem 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between; /* Alinea los elementos a los extremos */
+            align-items: center; /* Centra verticalmente los elementos */
+            padding-left: 1rem; /* Añade un poco de espacio al inicio */
+            padding-right: 1rem; /* Añade un poco de espacio al final */
+        }
+
+        .top-bar h5 {
+            margin-bottom: 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .top-bar .button-container {
+            /* Nuevo contenedor para los botones */
+            display: flex;
+            gap: 0.5rem;
+            /* Espacio entre botones */
+        }
+
+        .top-bar .button-container .btn {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+        }
+
+        .bottom-bar {
+            display: flex;
+            justify-content: space-around;
+            padding: 1.5rem 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #e9ecef;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .bottom-bar a {
+            color: white;
+            font-size: 1.1rem;
+            transition: color 0.2s ease;
+        }
+
+        .bottom-bar a:hover {
+            color: #e9ecef;
+        }
+
+        .container-main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+            padding-bottom: 4rem;
+            /* Para evitar que el contenido se superponga con la barra inferior */
+        }
+
+        .content-box {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 0.75rem;
+            margin-top: 1.5rem;
+            box-shadow: 0 3px 7px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-group {
+            width: 100%;
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn-group .btn {
+            width: 32%;
+            padding: 0.75rem 1rem;
+            font-size: 1.1rem;
+            border-radius: 0.75rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .btn-group .btn-outline-danger {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn-group .btn-outline-danger:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-group .btn-outline-warning {
+            color: #ffc107;
+            border-color: #ffc107;
+        }
+
+        .btn-group .btn-outline-warning:hover {
+            background-color: #ffc107;
+            color: #343a40;
+        }
+
+        .btn-group .btn-outline-info {
+            color: #17a2b8;
+            border-color: #17a2b8;
+        }
+
+        .btn-group .btn-outline-info:hover {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        /* Estilo para los botones en los modales */
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+            border-radius: 0.75rem;
+            padding: 0.8rem 1.5rem;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            font-weight: 500;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .btn-secondary {
+            border-radius: 0.75rem;
+            padding: 0.8rem 1.5rem;
+            font-size: 1.1rem;
+            width: 100%;
+            font-weight: 500;
+        }
+
+        .btn-close {
+            color: #dc3545;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-close:hover {
+            opacity: 1;
+        }
+
+        /* Estilo para los badges de estado */
+        .badge {
+            font-size: 0.85rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+        }
+
+        .badge-warning {
+            background-color: #ffc107;
+            color: #343a40;
+        }
+
+        .badge-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .badge-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        /* Estilo general para el modal de incidentes */
+        .modal-header {
+            background-color: #dc3545;
+            color: white;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #dee2e6;
+            padding: 1.5rem;
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
+        }
+
+        .modal-header .modal-title {
+            font-weight: 600;
+        }
+
+        .modal-body {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #dee2e6;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            border-bottom-left-radius: 1rem;
+            border-bottom-right-radius: 1rem;
+        }
+
+        /* Estilo específico para el modal de incidentes recientes */
+        #incidentesRecientesModal .list-group-item {
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        #incidentesRecientesModal .list-group-item:hover {
+            background-color: #e9ecef;
+            transform: translateY(-4px);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        #incidentesRecientesModal .fecha-incidente {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+            display: block;
+        }
+
+        /* Estilos para los filtros */
+        #incidentesRecientesModal .form-select,
+        #incidentesRecientesModal .form-control {
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #ced4da;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            padding: 0.75rem;
+            font-size: 1rem;
+        }
+
+        #incidentesRecientesModal .form-select:focus,
+        #incidentesRecientesModal .form-control:focus {
+            border-color: #0d6efd;
+            outline: none;
+            box-shadow: 0 0 0 0.25rem rgba(0, 108, 255, 0.1);
+        }
+
+        #incidentesRecientesModal .form-label {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #343a40;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Ancho del modal más grande */
+        #incidentesRecientesModal .modal-dialog {
+            max-width: 800px;
+        }
+
+        #incidentesRecientesModal .modal-content {
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top-bar">
+        <h5><i class="fas fa-map-marker-alt"></i> Mapa Interactivo</h5>
+        <div class="button-container">
+            <a href="mapa.html" class="btn btn-secondary"><i class="fas fa-map"></i> Mapa</a>
+            <a href="index.html" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+        </div>
+    </div>
+
+
+
+
+
+    </div>
+
+    <div class="modal fade" id="reportarZonaModal" tabindex="-1" aria-labelledby="reportarZonaModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="reportarZonaModalLabel">Reportar Zona de Riesgo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p style="font-size: 1.1rem;">Has reportado una zona de riesgo. ¿Deseas continuar con el reporte?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="btnEntendido">Entendido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="reportarZonaFormularioModal" tabindex="-1"
+        aria-labelledby="reportarZonaFormularioModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="formReporteZona">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="reportarZonaFormularioModalLabel">Formulario Reporte de Zona</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="zonaLugar" class="form-label">Lugar / Barrio</label>
+                            <input type="text" class="form-control" id="zonaLugar" placeholder="Ej. San Fernando, Centro, etc.">
+                        </div>
+                        <div class="mb-3">
+                            <label for="zonaDireccion" class="form-label">Dirección Exacta</label>
+                            <input type="text" class="form-control" id="zonaDireccion"
+                                placeholder="Ej. Calle 5 #23-45">
+                        </div>
+                        <div class="mb-3">
+                            <label for="zonaHora" class="form-label">Hora del Incidente</label>
+                            <input type="time" class="form-control" id="zonaHora">
+                        </div>
+                        <div class="mb-3">
+                            <label for="zonaDescripcion" class="form-label">Descripción del Hecho</label>
+                            <textarea class="form-control" id="zonaDescripcion" rows="3"
+                                placeholder="Describa brevemente lo ocurrido..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer d-flex flex-column gap-2">
+                        <button type="submit" class="btn btn-danger w-100">
+                            <i class="fas fa-save"></i> Enviar Reporte
+                        </button>
+                        <a href="https://wa.me/573001112233?text=Necesito%20ayuda%20inmediata%20en%20..." target="_blank"
+                            class="btn btn-success w-100">
+                            <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
+                        </a>
+                        <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="confirmacionModal" tabindex="-1" aria-labelledby="confirmacionModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="confirmacionModalLabel">Reporte Enviado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body" style="padding: 2rem;">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <p style="font-size: 1.1rem;">Tu reporte ha sido enviado a las autoridades. Gracias por alertarnos. Se ha
+                        enviado un mensaje a tu correo.</p>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modalZonas" tabindex="-1" aria-labelledby="modalZonasLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="modalZonasLabel">⚠️ Zonas peligrosas</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="padding: 1.5rem;">
+                    <p style="font-size: 1rem;">Estas son zonas con mayor número de reportes. Ten cuidado al transitar.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" id="entendidoZonas" data-bs-dismiss="modal">Entendido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="incidentesRecientesModal" tabindex="-1"
+        aria-labelledby="incidentesRecientesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="incidentesRecientesModalLabel">Incidentes Recientes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="filtroFecha" class="form-label">Filtrar por Fecha</label>
+                        <input type="date" class="form-control" id="filtroFecha">
+                    </div>
+                    <div class="mb-3">
+                        <label for="filtroEstado" class="form-label">Filtrar por Estado</label>
+                        <select class="form-select" id="filtroEstado">
+                            <option value="todos">Todos</option>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Resuelto">Resuelto</option>
+                            <option value="En proceso">En proceso</option>
+                        </select>
+                    </div>
+
+                    <ul id="incidentes-list" class="list-group">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="emergenciaModal" tabindex="-1" aria-labelledby="emergenciaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="formEmergencia">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="emergenciaModalLabel">Reporte de Emergencia</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="lugar" class="form-label">Lugar / Barrio</label>
+                            <input type="text" class="form-control" id="lugar" placeholder="Ej. San Fernando, Centro, etc.">
+                        </div>
+                        <div class="mb-3">
+                            <label for="direccion" class="form-label">Dirección Exacta</label>
+                            <input type="text" class="form-control" id="direccion" placeholder="Ej. Calle 5 #23-45">
+                        </div>
+                        <div class="mb-3">
+                            <label for="hora" class="form-label">Hora del Incidente</label>
+                            <input type="time" class="form-control" id="hora">
+                        </div>
+                        <div class="mb-3">
+                            <label for="descripcion" class="form-label">Descripción del Hecho</label>
+                            <textarea class="form-control" id="descripcion" rows="3"
+                                placeholder="Describa brevemente lo ocurrido..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-danger">Enviar Reporte</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="container container-main">
+        <div class="content-box">
+            <div id="map"></div>
+            <div class="btn-group d-flex justify-content-between">
+                <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#reportarZonaModal">📶 Reportar
+                    zona</button>
+                <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modalZonas">⚠️ Zonas
+                    peligrosas</button>
+                <button class="btn btn-outline-info" data-bs-toggle="modal"
+                    data-bs-target="#incidentesRecientesModal">🔄
+                    Incidentes recientes</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <a href="perfil.html" class="text-dark"><i class="fas fa-user fa-lg"></i> <span
+                style="font-size: 1rem;">Perfil</span></a>
+        <a href="configuracion.html" class="text-dark"><i class="fas fa-cog fa-lg"></i> <span
+                style="font-size: 1rem;">Configuración</span></a>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            // Reemplaza con tu propia configuración de Firebase
+            apiKey: "AIzaSyBn4RQ511FLSSPbadyC4Z9WR_LE91hy7qM",
+            authDomain: "safecamp-1eaa6.firebaseapp.com",
+            projectId: "safecamp-1eaa6",
+            storageBucket: "safecamp-1eaa6.firebasestorage.app",
+            messagingSenderId: "199048059756",
+            appId: "1:199048059756:web:4ed0a257f6807a71307149"
+        };
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let zonasPeligrosasAmarillas = [];
+        let map;
+
+
+        // Función para generar zonas aleatorias de riesgo
+        function generarZonasPeligrosas(lat, lng, cantidad, radioMetros) {
+            const zonas = [];
+
+            for (let i = 0; i < cantidad; i++) {
+                const r = radioMetros / 111300; // radio en grados (aprox. para latitudes)
+                const u = Math.random();
+                const v = Math.random();
+                const w = r * Math.sqrt(u);
+                const t = 2 * Math.PI * v;
+                const offsetLat = w * Math.cos(t);
+                const offsetLng = w * Math.sin(t) / Math.cos(lat * Math.PI / 180);
+
+                const latFinal = lat + offsetLat;
+                const lngFinal = lng + offsetLng;
+
+                zonas.push([latFinal, lngFinal]);
+            }
+
+            return zonas;
+        }
+
+        // Inicializar mapa sin zonas amarillas
+        function initMap() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+
+                    map = L.map('map').setView([lat, lng], 15);
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap'
+                    }).addTo(map);
+
+                    L.marker([lat, lng]).addTo(map).bindPopup("Tu ubicación").openPopup();
+
+                    // Obtener incidentes de Firestore al inicializar el mapa (opcional, se obtienen tambiénal abrir el modal)
+                    obtenerIncidentes();
+
+
+                }, function () {
+                    alert("No se pudo obtenertu ubicación.");
+                });
+            } else {
+                alert("Tu navegador no soporta geolocalización.");
+            }
+        }
+
+        // Función para añadir zonas amarillas
+        document.getElementById('entendidoZonas').addEventListener('click', function () {
+            // Borrar zonas anteriores si se hace clic en "Entendido"
+            zonasPeligrosasAmarillas.forEach(zone => {
+                zone.remove();
+            });
+
+            zonasPeligrosasAmarillas = [];
+
+            // Generamos las zonas de riesgo (amarillas) al hacer clicen "Entendido"
+            const lat = map.getCenter().lat;
+            const lng = map.getCenter().lng;
+            const zonas = generarZonasPeligrosas(lat, lng, 10, 500); // 10 zonas, radio 500m
+            zonas.forEach(([zLat, zLng]) => {
+                const zona = L.circle([zLat, zLng], {
+                    radius: 60,
+                    color: 'yellow',
+                    fillColor: '#ff0',
+                    fillOpacity: 0.5
+                }).addTo(map);
+
+                zonasPeligrosasAmarillas.push(zona); // Guardamos las zonas amarillas
+            });
+        });
+
+        window.onload = initMap;
+    </script>
+
+    <script>
+        // Agregar evento al botón "Entendido" en Reportar Zona
+        document.getElementById('btnEntendido').addEventListener('click', function () {
+            // Cerrar el modal de Reportar Zona
+            var reportarZonaModal = new bootstrap.Modal(document.getElementById('reportarZonaModal'));
+            reportarZonaModal.hide();
+
+            // Abrir el formulario de Reporte de Zona
+            var reportarZonaFormularioModal = new bootstrap.Modal(document.getElementById('reportarZonaFormularioModal'));
+            reportarZonaFormularioModal.show();
+        });
+    </script>
+
+    <script>
+        const incidentesRecientesModal = document.getElementById('incidentesRecientesModal');
+        const incidentesList = document.getElementById('incidentes-list');
+        const filtroFechaInput = document.getElementById('filtroFecha');
+        const filtroEstadoSelect = document.getElementById('filtroEstado');
+
+        let incidentesData = []; // Variable para almacenar los incidentes obtenidos de Firestore
+
+        function mostrarIncidentes(incidentesAMostrar) {
+            incidentesList.innerHTML = '';
+            incidentesAMostrar.forEach(incidente => { // Corrected from incidentes to incidentesAMostrar
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item';
+                listItem.innerHTML = `
+                        <p><strong>Lugar:</strong> ${incidente.lugar}</p>
+                        <p><strong>Dirección:</strong> ${incidente.direccion}</p>
+                        <p><strong>Hora:</strong> ${incidente.hora}</p>
+                        <span class="fecha-incidente">Fecha: ${incidente.fecha}</span>
+                        <span class="badge ${getEstadoBadgeClass(incidente.estado)}">${incidente.estado}</span>
+                    `;
+                incidentesList.appendChild(listItem);
+            });
+        }
+
+        function getEstadoBadgeClass(estado) {
+            switch (estado) {
+                case 'Pendiente': return 'badge-warning';
+                case 'Resuelto': return 'badge-success';
+                case 'En proceso': return 'badge-info';
+                default: return '';
+            }
+        }
+
+        function filtrarIncidentes() {
+            const fechaFiltro = filtroFechaInput.value;
+            const estadoFiltro = filtroEstadoSelect.value;
+
+            const incidentesFiltrados = incidentesData.filter(incidente => { // Usar incidentesData
+                const fechaCoincide = !fechaFiltro || incidente.fecha === fechaFiltro;
+                const estadoCoincide = !estadoFiltro || estadoFiltro === 'todos' || incidente.estado === estadoFiltro;
+                return fechaCoincide && estadoCoincide;
+            });
+
+            mostrarIncidentes(incidentesFiltrados);
+        }
+
+        filtroFechaInput.addEventListener('change', filtrarIncidentes);
+        filtroEstadoSelect.addEventListener('change', filtrarIncidentes);
+
+        incidentesRecientesModal.addEventListener('shown.bs.modal', () => {
+            obtenerIncidentes(); // Asegúrate de que los incidentes se carguen desde Firestore
+        });
+
+        // Función para obtener incidentes de Firestore
+        function obtenerIncidentes() {
+            db.collection("incidentes").get().then((querySnapshot) => {
+                incidentesData = []; // Limpiar datos anteriores
+                querySnapshot.forEach((doc) => {
+                    incidentesData.push({
+                        id: doc.id,
+                        lugar: doc.data().lugar,
+                        direccion: doc.data().direccion,
+                        hora: doc.data().hora,
+                        fecha: doc.data().fecha,
+                        estado: doc.data().estado
+                    });
+                });
+                mostrarIncidentes(incidentesData); // Muestra los incidentes obtenidos de Firestore
+            }).catch((error) => {
+                console.error("Error al obtener incidentes: ", error);
+                alert("Error al obtener incidentes. Por favor, intenta de nuevo más tarde.");
+            });
+        }
+
+
+        // Evento para el formulario de reporte de zona (para guardar en Firestore)
+        document.getElementById('formReporteZona').addEventListener('submit', function (event) {
+            event.preventDefault(); // Evita el envío del formulario por defecto
+
+            const lugar = document.getElementById('zonaLugar').value;
+            const direccion = document.getElementById('zonaDireccion').value;
+            const hora = document.getElementById('zonaHora').value;
+            const descripcion = document.getElementById('zonaDescripcion').value;
+            const fecha = new Date().toISOString().split('T')[0]; // Obtiene la fecha en formato AAAA-MM-DD
+            const estado = "Pendiente"; // Estado inicial
+
+            // Agrega un nuevo documento a la colección "incidentes" en Firestore
+            db.collection("incidentes").add({
+                lugar: lugar,
+                direccion: direccion,
+                hora: hora,
+                fecha: fecha,
+                descripcion: descripcion,
+                estado: estado,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            })
+                .then((docRef) => {
+                    console.log("Documento escrito con ID: ", docRef.id);
+                    // Mostrar mensaje de éxito (modal de confirmación)
+                    var confirmacionModal = new bootstrap.Modal(document.getElementById('confirmacionModal'));
+                    confirmacionModal.show();
+
+                    // Cerrar el modal del formulario
+                    var reportarZonaFormularioModal = new bootstrap.Modal(document.getElementById('reportarZonaFormularioModal'));
+                    reportarZonaFormularioModal.hide();
+
+                    // Limpiar el formulario
+                    document.getElementById('formReporteZona').reset();
+
+                    // Actualizar la lista de incidentes (opcional: si quieres que se vea el nuevoincidente de inmediato)
+                    obtenerIncidentes();
+
+                })
+                .catch((error) => {
+                    console.error("Error al agregar documento: ", error);
+                    alert("Error al reportar el incidente. Por favor, intenta de nuevo."); // Opcional: Mostrar mensaje de error al usuario
+                });
+        });
+
+    </script>
+</body>
+
+</html>

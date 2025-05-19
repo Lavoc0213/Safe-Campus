@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SafeCampus - Inicio</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .top-bar {
+            background-color: #0d6efd;
+            color: white;
+            padding: 1.5rem 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-bar h1 {
+            font-size: 2.25rem;
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+
+        .container-main {
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 2rem auto;
+            max-width: 1200px;
+        }
+
+        .card-option {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-option:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            color: #0d6efd;
+        }
+
+        .card-option h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .card-option p {
+            font-size: 1.1rem;
+            color: #667885;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-primary {
+            width: 100%;
+            font-size: 1.2rem;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            background-color: #0d6efd;
+            border: none;
+            color: white;
+            transition: background-color 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+
+        .btn-danger {
+            width: 100%;
+            font-size: 1.2rem;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            background-color: #dc3545;
+            border: none;
+            color: white;
+            transition: background-color 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .btn-warning {
+            width: 100%;
+            font-size: 1.2rem;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            background-color: #ffc107;
+            border: none;
+            color: #343a40;
+            transition: background-color 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+
+        .btn-info {
+            width: 100%;
+            font-size: 1.2rem;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            background-color: #17a2b8;
+            border: none;
+            color: white;
+            transition: background-color 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-info:hover {
+            background-color: #117a8b;
+        }
+
+        .bottom-bar {
+            display: flex;
+            justify-content: space-around;
+            padding: 1.5rem 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #e9ecef;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .bottom-bar a {
+            color: #495057;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: color 0.2s ease;
+        }
+
+        .bottom-bar a:hover {
+            color: #0d6efd;
+        }
+
+        .modal-content {
+            border-radius: 1rem;
+            border: none;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            background-color: #0d6efd;
+            color: white;
+            border-bottom: none;
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
+            padding: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+
+        .btn-close {
+            color: white;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-close:hover {
+            opacity: 1;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            border-top: none;
+            border-bottom-left-radius: 1rem;
+            border-bottom-right-radius: 1rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .modal-footer .btn {
+            border-radius: 0.75rem;
+            font-size: 1.1rem;
+            padding: 0.8rem 1.5rem;
+        }
+
+        #mapaRuta {
+            border-radius: 0.75rem;
+            height: 400px;
+            width: 100%;
+        }
+
+        #emergenciaModal .modal-header {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        #emergenciaModal .modal-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        #emergenciaModal .modal-body {
+            padding: 2rem;
+        }
+
+        #emergenciaModal .form-label {
+            font-weight: 500;
+            color: #343a40;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        #emergenciaModal .form-control {
+            border-radius: 0.5rem;
+            border-color: #ced4da;
+            padding: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        #emergenciaModal .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+
+        #emergenciaModal textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        #emergenciaModal .modal-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        #emergenciaModal .btn-primary {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        #emergenciaModal .btn-primary:hover {
+            background-color: #c82333;
+            border-color: #c82333;
+        }
+
+        #emergenciaModal .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        #emergenciaModal .btn-success:hover {
+            background-color: #218838;
+            border-color: #218838;
+        }
+
+        #emergenciaModal .btn-secondary {
+            background-color: #e2e3e4;
+            border-color: #e2e3e4;
+            color: #383d41;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        #emergenciaModal .btn-secondary:hover {
+            background-color: #d3d4d5;
+            border-color: #d3d4d5;
+        }
+
+        .alert-danger {
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 992px) {
+            .container-main {
+                grid-template-columns: 1fr;
+                max-width: 800px;
+            }
+
+            .card-option {
+                margin-bottom: 1.5rem;
+            }
+
+            .bottom-bar {
+                flex-direction: row;
+            }
+
+            .bottom-bar a {
+                flex: 1;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-bar h1 {
+                font-size: 2rem;
+            }
+
+            .modal-title {
+                font-size: 1.2rem;
+            }
+
+            #emergenciaModal .modal-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .bottom-bar {
+                flex-direction: column;
+            }
+
+            .bottom-bar a {
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <h1><i class="fas fa-shield-alt"></i> SafeCampus</h1>
+    </div>
+    <div class="container container-main">
+        <div class="card-option">
+            <div class="icon"><i class="fas fa-map-marked-alt"></i></div>
+            <h2>Mapa de Zonas de Riesgo</h2>
+            <p>Visualiza las áreas con reportes de incidentes y mantente informado.</p>
+            <a href="mapa-individual.html" class="btn btn-primary">Ver Mapa</a>
+        </div>
+        <div class="card-option">
+            <div class="icon"><i class="fas fa-route"></i></div>
+            <h2>Ruta Segura Inteligente</h2>
+            <p>Planifica tu ruta evitando zonas de riesgo.</p>
+            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalRuta">Planear Ruta</button>
+        </div>
+        <div class="card-option">
+            <div class="icon text-danger"><i class="fas fa-exclamation-triangle"></i></div>
+            <h2>Emergencia</h2>
+            <p>Reporta una emergencia y obtén ayuda rápidamente.</p>
+            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#emergenciaModal">Reportar Emergencia</button>
+        </div>
+        <div class="card-option">
+            <div class="icon"><i class="fas fa-user-friends"></i></div>
+            <h2>Acompañamiento</h2>
+            <p>Solicita acompañamiento de otros usuarios para mayor seguridad.</p>
+            <a href="acompanamiento.html" class="btn btn-info">Activar</a>
+        </div>
+    </div>
+    <div class="modal fade" id="modalRuta" tabindex="-1" aria-labelledby="modalRutaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modalRutaLabel">Ruta Segura Inteligente</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="mapaRuta"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="emergenciaModal" tabindex="-1" aria-labelledby="emergenciaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="formEmergencia">
+                    <div class="modal-header">
+                        <h2 class="modal-title" id="emergenciaModalLabel">Reporte de Emergencia</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="alertEmergencia" class="alert alert-danger d-none" role="alert">
+                            Por favor, complete todos los campos del formulario.
+                        </div>
+                        <div class="mb-3">
+                            <label for="categoria" class="form-label">Categoría <span class="text-danger">*</span></label>
+                            <select class="form-select" id="categoria" required>
+                                <option value="" disabled selected>Seleccione una categoría</option>
+                                <option value="Robo">Robo</option>
+                                <option value="Acoso">Acoso</option>
+                                <option value="Agresion">Agresión</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lugar" class="form-label">Lugar / Barrio <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="lugar" placeholder="Ej. San Fernando, Centro, etc." required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="direccion" class="form-label">Dirección Exacta <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="direccion" placeholder="Ej. Calle 5 #23-45" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="hora" class="form-label">Hora del Incidente <span class="text-danger">*</span></label>
+                            <input type="time" class="form-control" id="hora" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="descripcion" class="form-label">Descripción del Hecho <span
+                                    class="text-danger">*</span></label>
+                            <textarea class="form-control" id="descripcion" rows="3"
+                                placeholder="Describa brevemente lo ocurrido..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary w-100" id="btnEnviarEmergencia">
+                            <i class="fas fa-paper-plane"></i> Enviar Reporte
+                        </button>
+                        <button type="button" class="btn btn-success w-100" id="btnWhatsappModal">
+                            <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
+                        </button>
+                        <button type="button" class="btn btn-danger w-100" id="btnPoliciaModal">
+                            <i class="fas fa-phone"></i> Contactar a la Policía
+                        </button>
+                        <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="confirmacionModal" tabindex="-1" aria-labelledby="confirmacionModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center">
+                <div class="modal-header bg-success text-white">
+                    <h2 class="modal-title" id="confirmacionModalLabel">Reporte Enviado</h2>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <p style="font-size: 1.2rem;">Tu reporte ha sido enviado a las autoridades. Gracias por alertarnos.</p>
+                </div>
+                <div class="modal-footer justify-content-center bg-light">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom-bar">
+        <a href="perfil.html" class="text-dark"><i class="fas fa-user fa-lg"></i> <span style="font-size: 1rem;">Perfil</span></a>
+        <a href="configuracion.html" class="text-dark"><i class="fas fa-cog fa-lg"></i> <span style="font-size: 1rem;">Configuración</span></a>
+    </div>
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="module">
+        // Configuración de Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBn4RQ511FLSSPbadyC4Z9WR_LE91hy7qM",
+            authDomain: "safecamp-1eaa6.firebaseapp.com",
+            projectId: "safecamp-1eaa6",
+            storageBucket: "safecamp-1eaa6.firebasestorage.app",
+            messagingSenderId: "199048059756",
+            appId: "1:199048059756:web:4ed0a257f6807a71307149"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let mapaRuta;
+        let controlRuta;
+        let marcadorDestino;
+        let marcadorUsuario;
+        const modalRuta = document.getElementById('modalRuta');
+        const formEmergencia = document.getElementById('formEmergencia');
+        const emergenciaModal = document.getElementById('emergenciaModal');
+        const confirmacionModal = document.getElementById('confirmacionModal');
+        const alertEmergencia = document.getElementById('alertEmergencia');
+
+
+        modalRuta.addEventListener('shown.bs.modal', function () {
+            if (!mapaRuta) {
+                mapaRuta = L.map('mapaRuta').setView([0, 0], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(mapaRuta);
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        const usuarioCoords = [lat, lng];
+                        mapaRuta.setView(usuarioCoords, 15);
+                        marcadorUsuario = L.marker(usuarioCoords).addTo(mapaRuta).bindPopup("Tu ubicación").openPopup();
+                        mapaRuta.on('click', function (e) {
+                            const destino = e.latlng;
+                            if (controlRuta) {
+                                mapaRuta.removeControl(controlRuta);
+                            }
+                            if (marcadorDestino) {
+                                mapaRuta.removeLayer(marcadorDestino);
+                            }
+                            marcadorDestino = L.marker(destino).addTo(mapaRuta).bindPopup("Destino seleccionado").openPopup();
+                            controlRuta = L.Routing.control({
+                                waypoints: [
+                                    L.latLng(usuarioCoords[0], usuarioCoords[1]),
+                                    L.latLng(destino.lat, destino.lng)
+                                ],
+                                lineOptions: {
+                                    styles: [{ color: 'green', weight: 5 }]
+                                },
+                                createMarker: () => null,
+                                addWaypoints: false,
+                                draggableWaypoints: false,
+                                routeWhileDragging: false
+                            }).addTo(mapaRuta);
+                            controlRuta.on('routesfound', function (e) {
+                                if (e.routes.length > 0) {
+                                    console.log("Ruta encontrada:", e.routes[0]);
+                                } else {
+                                    console.warn("No se encontraron rutas.");
+                                }
+                            });
+                            controlRuta.on('routingerror', function (err) {
+                                console.error("Error de enrutamiento:", err);
+                                alert('No se pudo calcular la ruta. Intente de nuevo.');
+                            });
+                        });
+                    }, function () {
+                        alert('No se pudo obtener tu ubicación.');
+                    });
+                } else {
+                    alert('Tu navegador no soporta geolocalización.');
+                }
+            }
+        });
+
+        modalRuta.addEventListener('hidden.bs.modal', function () {
+            if (mapaRuta) {
+                mapaRuta.remove();
+                mapaRuta = null;
+                controlRuta = null;
+                marcadorDestino = null;
+                marcadorUsuario = null;
+            }
+        });
+
+        emergenciaModal.addEventListener('hidden.bs.modal', function () {
+            alertEmergencia.classList.add('d-none');
+            formEmergencia.reset();
+        });
+
+        formEmergencia.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const categoria = document.getElementById('categoria').value.trim();
+            const lugar = document.getElementById('lugar').value.trim();
+            const direccion = document.getElementById('direccion').value.trim();
+            const hora = document.getElementById('hora').value.trim();
+            const descripcion = document.getElementById('descripcion').value.trim();
+            const estado = "Pendiente"; // Estado inicial
+
+            if (categoria === '' || lugar === '' || direccion === '' || hora === '' || descripcion === '') {
+                alertEmergencia.classList.remove('d-none');
+                return;
+            } else {
+                alertEmergencia.classList.add('d-none');
+            }
+
+            // Agregar a Firestore
+            addDoc(collection(db, "incidentes"), {
+                categoria: categoria,
+                lugar: lugar,
+                direccion: direccion,
+                hora: hora,
+                descripcion: descripcion,
+                estado: estado,
+                timestamp: serverTimestamp() // Agregar timestamp
+            })
+                .then(function (docRef) {
+                    console.log("Document written with ID: ", docRef.id);
+                    $(emergenciaModal).modal('hide');
+                    $(confirmacionModal).modal('show');
+                    formEmergencia.reset();
+                })
+                .catch(function (error) {
+                    console.error("Error adding document: ", error);
+                    alert('Ocurrió un error al enviar el reporte. Por favor, intente de nuevo.');
+                });
+        });
+
+        document.getElementById('btnWhatsappModal').addEventListener('click', function () {
+            const barrio = document.getElementById('lugar').value.trim();
+            const direccion = document.getElementById('direccion').value.trim();
+            if (barrio !== '' && direccion !== '') {
+                const mensaje = encodeURIComponent(`Necesito ayuda inmediata en el barrio ${barrio}, dirección ${direccion}`);
+                const url = `https://wa.me/573153819453?text=${mensaje}`;
+                window.open(url, '_blank');
+            } else {
+                alert('Por favor complete el campo de barrio y dirección.');
+            }
+        });
+
+        document.getElementById('btnPoliciaModal').addEventListener('click', function () {
+            // Enlace a la página de la Policía Nacional.  Se usa una página genérica de la policía.
+            const urlPolicia = 'https://www.policia.gov.co/denuncia-virtual';
+            window.open(urlPolicia, '_blank');
+        });
+    </script>
+</body>
+</html>
